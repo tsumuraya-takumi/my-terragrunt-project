@@ -1,5 +1,6 @@
 locals {
-  environment = "development"
+  env    = yamldecode(file(find_in_parent_folders("environment.yaml")))
+  params = yamldecode(file("${get_terragrunt_dir()}/network.yaml"))
 }
 
 include "root" {
@@ -12,8 +13,8 @@ terraform {
 }
 
 inputs = {
-  environment  = local.environment
-  project_name = include.root.locals.project_name
-  public_subnet_azs  = ["ap-northeast-1a", "ap-northeast-1c"]
-  private_subnet_azs  = ["ap-northeast-1a", "ap-northeast-1c"]
+  environment        = local.env.environment
+  project_name       = include.root.locals.project_name
+  public_subnet_azs  = local.params.public_subnet_azs
+  private_subnet_azs = local.params.private_subnet_azs
 }

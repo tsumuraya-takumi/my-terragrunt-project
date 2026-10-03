@@ -1,0 +1,6 @@
+public_subnet_azs:
+  - ap-northeast-1a
+  - ap-northeast-1c
+private_subnet_azs:
+  - ap-northeast-1a
+  - ap-northeast-1c
