@@ -22,7 +22,7 @@ run "vpc_output_has_correct_tags" {
   command = plan
 
   assert {
-    condition     = aws_vpc.vpc.tags.Name == "my-terragrunt-project-development-vpc"
+    condition     = aws_vpc.vpc.tags.Name == "my-project-development-vpc"
     error_message = "VPCのNameタグが想定と違います"
   }
 

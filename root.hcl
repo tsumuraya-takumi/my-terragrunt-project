@@ -1,7 +1,7 @@
 
 locals {
   aws_region   = "ap-northeast-1"
-  project_name = "my-terragrunt-project"
+  project_name = "my-project"
 }
 
 remote_state {
