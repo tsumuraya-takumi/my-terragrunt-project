@@ -57,12 +57,12 @@ run "subnet_tags_are_correct" {
   command = plan
 
   assert {
-    condition     = aws_subnet.public_subnet["ap-northeast-1a"].tags.Name == "my-terragrunt-project-development-public-1a"
+    condition     = aws_subnet.public_subnet["ap-northeast-1a"].tags.Name == "my-project-development-public-1a"
     error_message = "Public SubnetのNameタグが想定と違います"
   }
 
   assert {
-    condition     = aws_subnet.private_subnet["ap-northeast-1a"].tags.Name == "my-terragrunt-project-development-private-1a"
+    condition     = aws_subnet.private_subnet["ap-northeast-1a"].tags.Name == "my-project-development-private-1a"
     error_message = "Private SubnetのNameタグが想定と違います"
   }
 }

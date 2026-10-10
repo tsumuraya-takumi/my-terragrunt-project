@@ -12,7 +12,7 @@ run "route_table_1a_tags_are_correct" {
   command = plan
 
   assert {
-    condition     = aws_route_table.public_rt["ap-northeast-1a"].tags.Name == "my-terragrunt-project-development-public-rt-1a"
+    condition     = aws_route_table.public_rt["ap-northeast-1a"].tags.Name == "my-project-development-public-rt-1a"
     error_message = "パブリックルートテーブル1aのNameタグが想定と違います"
   }
 }
@@ -21,7 +21,7 @@ run "route_table_1c_tags_are_correct" {
   command = plan
 
   assert {
-    condition     = aws_route_table.public_rt["ap-northeast-1c"].tags.Name == "my-terragrunt-project-development-public-rt-1c"
+    condition     = aws_route_table.public_rt["ap-northeast-1c"].tags.Name == "my-project-development-public-rt-1c"
     error_message = "パブリックルートテーブル1cのNameタグが想定と違います"
   }
 }

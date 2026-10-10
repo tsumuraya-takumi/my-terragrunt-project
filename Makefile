@@ -14,7 +14,10 @@ check-security:
 check-server:
 	cd modules/server && make check
 
-check-all: fmt-hcl-check check-network check-security check-server
+check-alb:
+	cd modules/alb && make check
+
+check-all: fmt-hcl-check check-network check-security check-server check-alb
 
 
 # Terraformコマンド
@@ -27,7 +30,10 @@ fmt-security:
 fmt-server:
 	cd modules/server && terraform fmt -recursive
 
-fmt-all: fmt-network fmt-security fmt-server
+fmt-alb:
+	cd modules/alb && terraform fmt -recursive
+
+fmt-all: fmt-network fmt-security fmt-server fmt-alb
 
 validate-network:
 	cd modules/network && terraform validate
@@ -38,7 +44,10 @@ validate-security:
 validate-server:
 	cd modules/server && terraform validate
 
-validate-all: validate-network validate-security validate-server
+validate-alb:
+	cd modules/alb && terraform validate
+
+validate-all: validate-network validate-security validate-server validate-alb
 
 
 # Terraform testコマンド
@@ -51,4 +60,7 @@ test-security:
 test-server:
 	cd modules/server && terraform test -var-file=tests/common.tfvars
 
-test-all: test-network test-security test-server
+test-alb:
+	cd modules/server && terraform test -var-file=tests/common.tfvars
+
+test-all: test-network test-security test-server test-alb
