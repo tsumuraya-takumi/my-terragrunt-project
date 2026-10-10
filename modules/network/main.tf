@@ -92,3 +92,62 @@ resource "aws_route_table_association" "public_rt_assoc" {
   route_table_id = aws_route_table.public_rt[each.value].id
   subnet_id      = aws_subnet.public_subnet[each.value].id
 }
+
+# ------------------------
+# NAT Gateway
+# ------------------------
+
+resource "aws_eip" "nat" {
+  for_each = toset(var.public_subnet_azs)
+
+  domain = "vpc"
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-nat-eip-${substr(each.value, -2, 2)}"
+    Env  = var.environment
+  }
+}
+
+resource "aws_nat_gateway" "nat" {
+  for_each = toset(var.public_subnet_azs)
+
+  allocation_id = aws_eip.nat[each.value].id
+  subnet_id     = aws_subnet.public_subnet[each.value].id
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-nat-${substr(each.value, -2, 2)}"
+    Env  = var.environment
+  }
+
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# ------------------------
+# Private Route Table
+# ------------------------
+
+resource "aws_route_table" "private_rt" {
+  for_each = toset(var.private_subnet_azs)
+
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-private-rt-${substr(each.value, -2, 2)}"
+    Env  = var.environment
+  }
+}
+
+resource "aws_route" "private_rt_default" {
+  for_each = toset(var.private_subnet_azs)
+
+  route_table_id         = aws_route_table.private_rt[each.value].id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat[each.value].id
+}
+
+resource "aws_route_table_association" "private_rt_assoc" {
+  for_each = toset(var.private_subnet_azs)
+
+  route_table_id = aws_route_table.private_rt[each.value].id
+  subnet_id      = aws_subnet.private_subnet[each.value].id
+}
