@@ -25,9 +25,4 @@ run "vpc_output_has_correct_tags" {
     condition     = aws_vpc.vpc.tags.Name == "my-project-development-vpc"
     error_message = "VPCのNameタグが想定と違います"
   }
-
-  assert {
-    condition     = aws_vpc.vpc.tags.Env == "development"
-    error_message = "環境がdevelopmentではありません"
-  }
 }

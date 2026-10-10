@@ -1,17 +1,20 @@
+locals {
+  name_prefix = "${var.project_name}-${var.environment}"
+}
+
 # ------------------------
 # VPC
 # ------------------------
 
 resource "aws_vpc" "vpc" {
-  cidr_block                       = "10.0.0.0/16"
+  cidr_block                       = var.vpc_cidr
   instance_tenancy                 = "default"
   enable_dns_support               = true
   enable_dns_hostnames             = true
   assign_generated_ipv6_cidr_block = false
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-vpc"
-    Env  = var.environment
+    Name = "${local.name_prefix}-vpc"
   }
 }
 
@@ -21,30 +24,28 @@ resource "aws_vpc" "vpc" {
 
 # Public Cidr (10.0.0.0/24、10.0.1.0/24)
 resource "aws_subnet" "public_subnet" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   vpc_id                  = aws_vpc.vpc.id
   availability_zone       = each.value
-  cidr_block              = cidrsubnet(aws_vpc.vpc.cidr_block, 8, index(var.public_subnet_azs, each.value))
-  map_public_ip_on_launch = "true"
+  cidr_block              = cidrsubnet(aws_vpc.vpc.cidr_block, 8, index(var.azs, each.value))
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-public-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-public-${substr(each.value, -2, 2)}"
   }
 }
 
 # Private Cidr (10.0.10.0/24、10.0.11.0/24)
 resource "aws_subnet" "private_subnet" {
-  for_each = toset(var.private_subnet_azs)
+  for_each = toset(var.azs)
 
   vpc_id            = aws_vpc.vpc.id
   availability_zone = each.value
-  cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 8, index(var.private_subnet_azs, each.value) + 10)
+  cidr_block        = cidrsubnet(aws_vpc.vpc.cidr_block, 8, index(var.azs, each.value) + 10)
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-private-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-private-${substr(each.value, -2, 2)}"
   }
 }
 
@@ -57,8 +58,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-igw"
-    Env  = var.environment
+    Name = "${local.name_prefix}-igw"
   }
 }
 
@@ -68,18 +68,17 @@ resource "aws_internet_gateway" "igw" {
 # ------------------------
 
 resource "aws_route_table" "public_rt" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-public-rt-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-public-rt-${substr(each.value, -2, 2)}"
   }
 }
 
 resource "aws_route" "public_rt_default" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   route_table_id         = aws_route_table.public_rt[each.value].id
   destination_cidr_block = "0.0.0.0/0"
@@ -87,7 +86,7 @@ resource "aws_route" "public_rt_default" {
 }
 
 resource "aws_route_table_association" "public_rt_assoc" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   route_table_id = aws_route_table.public_rt[each.value].id
   subnet_id      = aws_subnet.public_subnet[each.value].id
@@ -98,25 +97,23 @@ resource "aws_route_table_association" "public_rt_assoc" {
 # ------------------------
 
 resource "aws_eip" "nat" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   domain = "vpc"
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-nat-eip-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-nat-eip-${substr(each.value, -2, 2)}"
   }
 }
 
 resource "aws_nat_gateway" "nat" {
-  for_each = toset(var.public_subnet_azs)
+  for_each = toset(var.azs)
 
   allocation_id = aws_eip.nat[each.value].id
   subnet_id     = aws_subnet.public_subnet[each.value].id
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-nat-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-nat-${substr(each.value, -2, 2)}"
   }
 
   depends_on = [aws_internet_gateway.igw]
@@ -127,18 +124,17 @@ resource "aws_nat_gateway" "nat" {
 # ------------------------
 
 resource "aws_route_table" "private_rt" {
-  for_each = toset(var.private_subnet_azs)
+  for_each = toset(var.azs)
 
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = "${var.project_name}-${var.environment}-private-rt-${substr(each.value, -2, 2)}"
-    Env  = var.environment
+    Name = "${local.name_prefix}-private-rt-${substr(each.value, -2, 2)}"
   }
 }
 
 resource "aws_route" "private_rt_default" {
-  for_each = toset(var.private_subnet_azs)
+  for_each = toset(var.azs)
 
   route_table_id         = aws_route_table.private_rt[each.value].id
   destination_cidr_block = "0.0.0.0/0"
@@ -146,7 +142,7 @@ resource "aws_route" "private_rt_default" {
 }
 
 resource "aws_route_table_association" "private_rt_assoc" {
-  for_each = toset(var.private_subnet_azs)
+  for_each = toset(var.azs)
 
   route_table_id = aws_route_table.private_rt[each.value].id
   subnet_id      = aws_subnet.private_subnet[each.value].id

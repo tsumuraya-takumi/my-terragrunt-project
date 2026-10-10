@@ -1,3 +1,8 @@
+MODULES := network security server alb
+
+# fmt-% などのパターンルールは .PHONY に含めると無視されるため、ここには入れない
+.PHONY: fmt-hcl fmt-hcl-check fmt-all validate-all test-all check-all
+
 # Terragruntコマンド
 fmt-hcl:
 	terragrunt hcl fmt
@@ -5,62 +10,25 @@ fmt-hcl:
 fmt-hcl-check:
 	terragrunt hcl fmt --check
 
-check-network:
-	cd modules/network && make check
+# Terraformコマンド（例: make fmt-network / make validate-server / make test-network）
+fmt-%:
+	cd modules/$* && terraform fmt -recursive
 
-check-security:
-	cd modules/security && make check
+validate-%:
+	cd modules/$* && terraform init -backend=false -input=false > /dev/null && terraform validate
 
-check-server:
-	cd modules/server && make check
+# tests/ 配下に *.tftest.hcl があるモジュールのみ実行
+test-%:
+	@if ls modules/$*/tests/*.tftest.hcl > /dev/null 2>&1; then \
+		cd modules/$* && terraform test -var-file=tests/common.tfvars; \
+	else \
+		echo "skip: modules/$* にテストがありません"; \
+	fi
 
-check-alb:
-	cd modules/alb && make check
+check-%: fmt-% validate-% test-%
+	@:
 
-check-all: fmt-hcl-check check-network check-security check-server check-alb
-
-
-# Terraformコマンド
-fmt-network:
-	cd modules/network && terraform fmt -recursive
-
-fmt-security:
-	cd modules/security && terraform fmt -recursive
-
-fmt-server:
-	cd modules/server && terraform fmt -recursive
-
-fmt-alb:
-	cd modules/alb && terraform fmt -recursive
-
-fmt-all: fmt-network fmt-security fmt-server fmt-alb
-
-validate-network:
-	cd modules/network && terraform validate
-
-validate-security:
-	cd modules/security && terraform validate
-
-validate-server:
-	cd modules/server && terraform validate
-
-validate-alb:
-	cd modules/alb && terraform validate
-
-validate-all: validate-network validate-security validate-server validate-alb
-
-
-# Terraform testコマンド
-test-network:
-	cd modules/network && terraform test -var-file=tests/common.tfvars
-
-test-security:
-	cd modules/security && terraform test -var-file=tests/common.tfvars
-
-test-server:
-	cd modules/server && terraform test -var-file=tests/common.tfvars
-
-test-alb:
-	cd modules/server && terraform test -var-file=tests/common.tfvars
-
-test-all: test-network test-security test-server test-alb
+fmt-all: $(addprefix fmt-,$(MODULES))
+validate-all: $(addprefix validate-,$(MODULES))
+test-all: $(addprefix test-,$(MODULES))
+check-all: fmt-hcl-check $(addprefix check-,$(MODULES))

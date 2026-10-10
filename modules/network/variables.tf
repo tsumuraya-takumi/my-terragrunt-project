@@ -6,12 +6,12 @@ variable "project_name" {
   type = string
 }
 
-variable "public_subnet_azs" {
-  type        = list(string)
-  description = "パブリックサブネットを配置するAZのリスト"
+variable "vpc_cidr" {
+  type        = string
+  description = "VPCのCIDRブロック"
 }
 
-variable "private_subnet_azs" {
+variable "azs" {
   type        = list(string)
-  description = "プライベートサブネットを配置するAZのリスト"
+  description = "サブネット・NAT Gatewayを配置するAZのリスト"
 }

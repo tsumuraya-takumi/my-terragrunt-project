@@ -9,12 +9,12 @@ import (
 
 func TestNetworkModule(t *testing.T) {
 	terraformOptions := &terraform.Options{
-		TerraformDir: "../modules/network",
+		TerraformDir: "../../modules/network",
 		Vars: map[string]interface{}{
-			"environment":        "test",
-			"project_name":       "my-terragrunt-project",
-			"public_subnet_azs":  []string{"ap-northeast-1a", "ap-northeast-1c"},
-			"private_subnet_azs": []string{"ap-northeast-1a", "ap-northeast-1c"},
+			"environment":  "test",
+			"project_name": "my-project",
+			"vpc_cidr":     "10.0.0.0/16",
+			"azs":          []string{"ap-northeast-1a", "ap-northeast-1c"},
 		},
 	}
 
