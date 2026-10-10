@@ -6,3 +6,7 @@ include "root" {
 terraform {
   source = "../../../modules/security"
 }
+inputs = {
+  environment  = include.root.locals.environment
+  project_name = include.root.locals.project_name
+}

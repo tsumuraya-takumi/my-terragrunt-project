@@ -11,12 +11,12 @@ variable "vpc_id" {
 }
 
 variable "private_subnet_ids" {
-  type = map(string)
+  type        = map(string)
   description = "ASGを配置するプライベートサブネットID"
 }
 
 variable "alb_sg_id" {
-  type = string
+  type        = string
   description = "ALBのSGのID"
 }
 

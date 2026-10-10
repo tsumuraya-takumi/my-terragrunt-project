@@ -45,7 +45,10 @@ terraform.rc
 # See: https://terragrunt.gruntwork.io/docs/reference/cli-options/#terragrunt-debug
 terragrunt-debug.tfvars.json
 
-# End of 
-https://www.toptal.com/developers/gitignore/api/terraform,terragrunt.DS_Store
+# End of https://www.toptal.com/developers/gitignore/api/terraform,terragrunt
 
+# テスト用の変数ファイルは機密情報を含まないので管理対象にする
+!**/tests/*.tfvars
+
+### macOS ###
 .DS_Store

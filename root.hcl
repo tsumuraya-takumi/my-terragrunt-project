@@ -2,6 +2,7 @@
 locals {
   aws_region   = "ap-northeast-1"
   project_name = "my-project"
+  environment  = yamldecode(file(find_in_parent_folders("environment.yaml"))).environment
 }
 
 remote_state {
@@ -33,6 +34,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project = "${local.project_name}"
+      Env     = "${local.environment}"
     }
   }
 }
