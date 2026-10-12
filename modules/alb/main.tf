@@ -30,6 +30,9 @@ resource "aws_lb_target_group" "app" {
 
   health_check {
     path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    matcher             = "200"
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 5
