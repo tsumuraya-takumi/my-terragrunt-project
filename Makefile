@@ -1,7 +1,7 @@
 MODULES := network security server alb
 
 # fmt-% などのパターンルールは .PHONY に含めると無視されるため、ここには入れない
-.PHONY: fmt-hcl fmt-hcl-check fmt-all validate-all test-all check-all
+.PHONY: fmt-hcl fmt-hcl-check fmt-all validate-all test-all check-all it-network it-web it-all
 
 # Terragruntコマンド
 fmt-hcl:
@@ -32,3 +32,14 @@ fmt-all: $(addprefix fmt-,$(MODULES))
 validate-all: $(addprefix validate-,$(MODULES))
 test-all: $(addprefix test-,$(MODULES))
 check-all: fmt-hcl-check $(addprefix check-,$(MODULES))
+
+# 結合テスト（実際に AWS にリソースを作成するため課金が発生する）
+it-network:
+	cd tests/integration && go test -v -timeout 30m ./network/...
+
+it-web:
+	cd tests/integration && go test -v -timeout 30m ./web/...
+
+# シナリオ同士を並列に実行しない（NAT・EIP が同時に倍作られるのを防ぐ）
+it-all:
+	cd tests/integration && go test -v -p 1 -timeout 60m ./...

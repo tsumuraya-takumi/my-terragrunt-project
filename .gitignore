@@ -52,3 +52,7 @@ terragrunt-debug.tfvars.json
 
 ### macOS ###
 .DS_Store
+
+### 結合テスト ###
+# 秘密情報を書く可能性があるためコミットしない（見本は .env.example）
+.env
