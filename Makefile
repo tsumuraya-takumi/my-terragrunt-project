@@ -1,4 +1,4 @@
-MODULES := network security server alb
+MODULES := network security server alb route53
 
 # fmt-% などのパターンルールは .PHONY に含めると無視されるため、ここには入れない
 .PHONY: fmt-hcl fmt-hcl-check fmt-all validate-all test-all check-all it-network it-web it-all
